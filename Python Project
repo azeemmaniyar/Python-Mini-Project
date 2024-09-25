@@ -1,0 +1,55 @@
+import pandas as pd
+import numpy as np
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn import metrics
+import matplotlib.pyplot as plt
+from datetime import datetime
+
+# Load the dataset
+data = {
+    'Date': ["Aug 07, 2017", "Aug 06, 2017", "Aug 05, 2017", "Aug 04, 2017", "Aug 03, 2017", "Aug 02, 2017", "Aug 01, 2017"],
+    'Open': [3212.78, 3257.61, 2897.63, 2806.93, 2709.56, 2727.13, 2871.3],
+    'High': [3397.68, 3293.29, 3290.01, 2899.33, 2813.31, 2762.53, 2921.35],
+    'Low': [3180.89, 3155.6, 2874.83, 2743.72, 2685.14, 2668.59, 2685.61],
+    'Close': [3378.94, 3213.94, 3252.91, 2895.89, 2804.73, 2710.67, 2718.26],
+    'Adj Close': [3378.94, 3213.94, 3252.91, 2895.89, 2804.73, 2710.67, 2718.26],
+    'Volume': [1482280000, 1105030000, 1945700000, 1002120000, 804797000, 1094950000, 1324670000],
+}
+
+df = pd.DataFrame(data)
+
+# Convert 'Date' to datetime format
+df['Date'] = pd.to_datetime(df['Date'], format='%b %d, %Y')
+
+# Extract the numeric year-month-day for regression
+df['Date_Num'] = df['Date'].dt.strftime('%Y%m%d').astype(int)
+
+# Select features and target variable
+X = df[['Date_Num', 'Open', 'High', 'Low', 'Adj Close', 'Volume']]
+y = df['Close']
+
+# Split the data into training and testing sets
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+# Create a linear regression model
+model = LinearRegression()
+
+# Train the model
+model.fit(X_train, y_train)
+
+# Make predictions on the test set
+y_pred = model.predict(X_test)
+
+# Visualize the results
+plt.scatter(X_test['Date_Num'], y_test, color='black')
+plt.plot(X_test['Date_Num'], y_pred, color='blue', linewidth=3)
+plt.xlabel('Date')
+plt.ylabel('Bitcoin Close Price')
+plt.title('Bitcoin Close Price Prediction')
+plt.show()
+
+# Evaluate the model
+print('Mean Absolute Error:', metrics.mean_absolute_error(y_test, y_pred))
+print('Mean Squared Error:', metrics.mean_squared_error(y_test, y_pred))
+print('Root Mean Squared Error:', np.sqrt(metrics.mean_squared_error(y_test, y_pred)))
